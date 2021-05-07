@@ -13,7 +13,7 @@ void sample_photons(const scene_model& scene_, const bvh_scene& bvh,
   auto scene  = scene_;
   auto lights = lights_;
 
-  int photons_per_light = 1000000;  // Fotones lanzados por fuente de luz
+  int photons_per_light = 10000000;  // Fotones lanzados por fuente de luz
   int intersectados     = 0;  // Mide el numero de fotones que chocan en un
   for (auto light : lights.lights) {
     if (light.instance == invalidid) {
@@ -82,7 +82,7 @@ void sample_photons(const scene_model& scene_, const bvh_scene& bvh,
   }
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::cout << "Lanzados " << photons_per_light * lights.lights.size()
-            << " intersectan: " << intersectados << std::endl;
+            << " intersectan: " << intersectados << "    " << std::endl;
 
   std::cout << "Porcentaje "
             << float(intersectados) /

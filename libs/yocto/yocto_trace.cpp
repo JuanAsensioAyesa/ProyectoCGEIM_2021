@@ -1330,6 +1330,7 @@ color_image trace_image(const scene_model& scene, const trace_params& params) {
   auto bvh    = make_bvh(scene, params);
   auto lights = make_lights(scene, params);
   auto state  = make_state(scene, params);
+
   for (auto sample = 0; sample < params.samples; sample++) {
     trace_samples(state, scene, bvh, lights, params);
   }
@@ -1341,8 +1342,12 @@ color_image trace_image(const scene_model& scene, const trace_params& params) {
 void trace_samples(trace_state& state, const scene_model& scene,
     const bvh_scene& bvh, const trace_lights& lights,
     const trace_params& params) {
-  auto rng = make_rng(1301081);
-  sample_photons(scene, bvh, lights, rng);
+  if (state.samples == 0) {
+    auto rng = make_rng(1301081);
+    if (params.sampler == trace_sampler_type::photon_map) {
+      sample_photons(scene, bvh, lights, rng);
+    }
+  }
   if (state.samples >= params.samples) return;
   if (params.noparallel) {
     for (auto j = 0; j < state.height; j++) {
