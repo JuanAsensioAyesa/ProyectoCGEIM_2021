@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <utility>
@@ -1170,11 +1171,10 @@ static trace_result trace_photon_map(const scene_model& scene,
   auto        opbounce   = 0;
   static bool once       = false;
   if (!once) {
-    sample_photons(scene, bvh, lights, rng);
+    // sample_photons(scene, bvh, lights, rng);
     once = true;
   }
-
-  return {radiance, hit, hit_albedo, hit_normal};
+  return {radiance, true, hit_albedo, hit_normal};
 }
 // Trace a single ray from the camera using the given algorithm.
 using sampler_func = trace_result (*)(const scene_model& scene,
@@ -1206,6 +1206,7 @@ bool is_sampler_lit(const trace_params& params) {
     case trace_sampler_type::naive: return true;
     case trace_sampler_type::eyelight: return false;
     case trace_sampler_type::falsecolor: return false;
+    case trace_sampler_type::photon_map: return true;
     default: {
       throw std::runtime_error("sampler unknown");
       return false;
@@ -1332,6 +1333,7 @@ color_image trace_image(const scene_model& scene, const trace_params& params) {
   for (auto sample = 0; sample < params.samples; sample++) {
     trace_samples(state, scene, bvh, lights, params);
   }
+  std::cout << "Trace_image" << std::endl;
   return get_render(state);
 }
 
@@ -1339,6 +1341,8 @@ color_image trace_image(const scene_model& scene, const trace_params& params) {
 void trace_samples(trace_state& state, const scene_model& scene,
     const bvh_scene& bvh, const trace_lights& lights,
     const trace_params& params) {
+  auto rng = make_rng(1301081);
+  sample_photons(scene, bvh, lights, rng);
   if (state.samples >= params.samples) return;
   if (params.noparallel) {
     for (auto j = 0; j < state.height; j++) {
