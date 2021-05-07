@@ -34,6 +34,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "photon_mapping.h"
 #include "yocto_cli.h"
 #include "yocto_color.h"
 #include "yocto_geometry.h"
@@ -758,9 +759,9 @@ static trace_result trace_pathmis(const scene_model& scene,
       if (!is_delta(material)) {
         // direct with MIS --- light
         for (auto sample_light : {true, false}) {
-          incoming       = sample_light ? sample_lights(scene, lights, position,
+          incoming = sample_light ? sample_lights(scene, lights, position,
                                         rand1f(rng), rand1f(rng), rand2f(rng))
-                                        : sample_bsdfcos(material, normal, outgoing,
+                                  : sample_bsdfcos(material, normal, outgoing,
                                         rand1f(rng), rand2f(rng));
           auto bsdfcos   = eval_bsdfcos(material, normal, outgoing, incoming);
           auto light_pdf = sample_lights_pdf(
@@ -1157,7 +1158,24 @@ static trace_result trace_falsecolor(const scene_model& scene,
   // done
   return {srgb_to_rgb(result), true, material.color, normal};
 }
+static trace_result trace_photon_map(const scene_model& scene,
+    const bvh_scene& bvh, const trace_lights& lights, const ray3f& ray_,
+    rng_state& rng, const trace_params& params) {
+  auto        radiance   = zero3f;
+  auto        weight     = vec3f{1, 1, 1};
+  auto        ray        = ray_;
+  auto        hit        = false;
+  auto        hit_albedo = vec3f{0, 0, 0};
+  auto        hit_normal = vec3f{0, 0, 0};
+  auto        opbounce   = 0;
+  static bool once       = false;
+  if (!once) {
+    sample_photons(scene, bvh, lights, rng);
+    once = true;
+  }
 
+  return {radiance, hit, hit_albedo, hit_normal};
+}
 // Trace a single ray from the camera using the given algorithm.
 using sampler_func = trace_result (*)(const scene_model& scene,
     const bvh_scene& bvh, const trace_lights& lights, const ray3f& ray,
@@ -1171,6 +1189,7 @@ static sampler_func get_trace_sampler_func(const trace_params& params) {
     case trace_sampler_type::eyelight: return trace_eyelight;
     case trace_sampler_type::eyelightao: return trace_eyelightao;
     case trace_sampler_type::falsecolor: return trace_falsecolor;
+    case trace_sampler_type::photon_map: return trace_photon_map;
     default: {
       throw std::runtime_error("sampler unknown");
       return nullptr;
