@@ -1,0 +1,170 @@
+{
+  "asset": {
+    "copyright": "Model by Fabio Pellacini from github.com/~xelatihy/yocto-gl"
+  },
+  "cameras": {
+    "default": {
+      "lens": 0.05,
+      "aperture": 0.0,
+      "aspect": 2.4,
+      "lookat": [-0.75, 0.4, 0.9, -0.075, 0.05, -0.05, 0, 1, 0]
+    },
+    "front": {
+      "lens": 1.6,
+      "aperture": 0.0,
+      "aspect": 3,
+      "lookat": [0, 1.75, 3, 0, 0.175, 0, 0, 1, 0]
+    },
+    "back": {
+      "lens": 0.75,
+      "aperture": 0.0,
+      "aspect": 3,
+      "lookat": [0, 1.5, -3.25, 0, -0.05, 0, 0, 1, 0]
+    },
+    "perspective-sharp": {
+      "lens": 0.1,
+      "aperture": 0.0,
+      "aspect": 2.4,
+      "lookat": [-0.6, 1.5, 2.75, -0.05, 0.15, 0, 0, 1, 0]
+    },
+    "perspective-dof": {
+      "lens": 0.1,
+      "aperture": 0.05,
+      "aspect": 2.4,
+      "lookat": [-0.6, 1.5, 2.75, -0.05, 0.15, 0, 0, 1, 0]
+    },
+    "orthographic-sharp": {
+      "lens": 0.03,
+      "aperture": 0.0,
+      "aspect": 2.4,
+      "orthographic": true,
+      "lookat": [-0.5, 1, 2, -0.05, 0.15, 0, 0, 1, 0]
+    },
+    "orthographic-dof": {
+      "lens": 0.03,
+      "aperture": 0.02,
+      "aspect": 2.4,
+      "orthographic": true,
+      "lookat": [-0.5, 1, 2, -0.05, 0.15, 0, 0, 1, 0]
+    }
+  },
+  "environments": {
+    "sky": {
+      "emission": [0.5, 0.5, 0.5],
+      "emission_tex": "sky"
+    }
+  },
+  "instances": {
+    "floor": {
+      "shape": "floor",
+      "material": "floor"
+    },
+    "largearealight1": {
+      "shape": "largearealight1",
+      "lookat": [-0.8, 1.6, 1.6, 0, 0.1, 0, 0, 1, 0],
+      "material": "largearealight1"
+    },
+    "largearealight2": {
+      "shape": "largearealight2",
+      "lookat": [0.8, 1.6, 1.6, 0, 0.1, 0, 0, 1, 0],
+      "material": "largearealight2"
+    },
+    "skull0": {
+      "shape": "sphere",
+      "frame": [1, 0, 0, 0, 0, 1, 0, 1, 0, -0.2, 0.05, 0],
+      "material": "gemstone"
+    }
+  },
+  "materials": {
+    "floor": {
+      "type": "matte",
+      "color": [0.7, 0.7, 0.7],
+      "color_tex": "floor"
+    },
+    "largearealight1": {
+      "type": "matte",
+      "emission": [15, 15, 15]
+    },
+    "largearealight2": {
+      "type": "matte",
+      "emission": [15, 15, 15]
+    },
+    "gemstone": {
+      "type": "refractive",
+      "color": [0, 1, 0],
+      "roughness": 0.1
+    },
+    "cube": {
+      "type": "refractive",
+      "color": [0.95, 0.95, 0.95],
+      "scattering": [0.9, 0.9, 0.9]
+    },
+    "sphere-glass-sharp": {
+      "type": "refractive",
+      "color": [1, 1, 1],
+      "roughness": 0
+    },
+    "sphere-glass-rough": {
+      "type": "refractive",
+      "color": [1, 0.7, 0.7],
+      "roughness": 0.1
+    },
+    "skull-matte": {
+      "type": "glossy",
+      "scattering": [0.5, 0.5, 0.5],
+      "color": [0.7, 0.5, 0.5],
+      "roughness": 1
+    },
+    "skull-transparent1": {
+      "type": "transparent",
+      "color": [1, 1, 1],
+      "roughness": 0.9
+    },
+    "skull-transparent2": {
+      "type": "transparent",
+      "color": [1, 1, 1],
+      "roughness": 0.6
+    },
+    "skull-transparent3": {
+      "type": "transparent",
+      "color": [1, 1, 1],
+      "roughness": 0.3
+    },
+    "skull-transparent4": {
+      "type": "transparent",
+      "color": [1, 1, 1],
+      "roughness": 0.1
+    },
+    "sphere-thinglass-rough": {
+      "type": "transparent",
+      "color": [1, 0.7, 0.7],
+      "roughness": 0.05
+    },
+    "bunny-glass-sharp": {
+      "type": "refractive",
+      "color": [1, 1, 1],
+      "roughness": 0
+    },
+    "bunny-glass-rough": {
+      "type": "refractive",
+      "color": [1, 0.7, 0.7],
+      "roughness": 0.1
+    },
+    "bunny-transparent": {
+      "type": "matte",
+      "color": [0.7, 0.5, 0.5],
+      "roughness": 1,
+      "opacity": 0.2
+    },
+    "bunny-thinglass-sharp": {
+      "type": "transparent",
+      "color": [1, 1, 1],
+      "roughness": 0
+    },
+    "bunny-thinglass-rough": {
+      "type": "transparent",
+      "color": [1, 0.7, 0.7],
+      "roughness": 0.05
+    }
+  }
+}
