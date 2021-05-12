@@ -125,7 +125,6 @@ class KDTree {
     max_distance = std::numeric_limits<float>::infinity();
 
     if (balanced.empty()) {
-      std::cout << "Empty" << std::endl;
       return;
     }
 
