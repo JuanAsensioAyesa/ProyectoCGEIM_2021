@@ -55,12 +55,12 @@ ray3f sample_random_ray(
   return random_ray;
 }
 
-bool trace_photon(const scene_model& scene_, const bvh_scene& bvh, Photon& p,
-    KDTree<Photon, 3>& m_caustics_map, rng_state& rng) {
+bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
+    KDTree<Photon, 3>& m_caustics_map, rng_state& rng, ray3f& ray) {
 #ifndef MAX_PHOTON_ITERATIONS
 #define MAX_PHOTON_ITERATIONS 7
 #endif
-  auto scene = scene_;
+  // auto scene = scene_;
 
   // Compute irradiance photon's energy
   vec3f energy = p.flux;
@@ -71,6 +71,8 @@ bool trace_photon(const scene_model& scene_, const bvh_scene& bvh, Photon& p,
 
   bool is_caustic_particle = false;
   int  i                   = 0;
+  bool end                 = false;
+
   // Iterate the path
   while (1) {
     // Throw ray and update current_it
@@ -110,9 +112,11 @@ bool trace_photon(const scene_model& scene_, const bvh_scene& bvh, Photon& p,
           m_caustics_map.store(pos, p);
         }
         is_caustic_particle = false;
+        end                 = true;
         break;
       }
       is_caustic_particle = false;
+      end                 = true;
       break;
     }
   }
@@ -159,15 +163,16 @@ void sample_photons(const scene_model& scene_, const bvh_scene& bvh,
                (photons_per_light * (1 / (2 * pif)) * (1 / light_area));
       p.position  = random_ray.o;
       p.direction = random_ray.d;
+      // auto intersection = intersect_bvh(bvh, scene, random_ray);
       // std::cout << "TRACE PHOTON IN " << std::endl;
-      trace_photon(scene, bvh, p, m_caustics_map, rng);
+      trace_photon(scene, bvh, p, m_caustics_map, rng, random_ray);
     }
   }
   if (m_caustics_map.size() > 0) m_caustics_map.balance();
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
   std::cout << "Lanzados " << photons_per_light * lights.lights.size()
-            << " intersectan: " << intersectados << "    " << std::endl;
+            << " intersectan: " << m_caustics_map.size() << "    " << std::endl;
 
   std::cout << "Porcentaje "
             << float(intersectados) /
