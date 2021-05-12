@@ -56,12 +56,11 @@ ray3f sample_random_ray(
 }
 
 
-bool trace_photon(const scene_model& scene_, const bvh_scene& bvh, Photon &p, KDTree<Photon, 3>& m_caustics_map, rng_state& rng)
+bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon &p, KDTree<Photon, 3>& m_caustics_map, rng_state& rng)
 {
 #ifndef MAX_PHOTON_ITERATIONS
 #define MAX_PHOTON_ITERATIONS 7
 #endif
-  auto scene = scene_;
 
 	// Compute irradiance photon's energy
 	vec3f energy = p.flux;
@@ -117,22 +116,18 @@ bool trace_photon(const scene_model& scene_, const bvh_scene& bvh, Photon &p, KD
       }
 		  else
   			break;
-
-		
-			is_caustic_particle = false;
 		}
 
 	return true;
 }
 
 
-void sample_photons(const scene_model& scene_, const bvh_scene& bvh,
+void sample_photons(const scene_model& scene, const bvh_scene& bvh,
     const trace_lights& lights_, rng_state& rng,
     KDTree<Photon, 3>& m_caustics_map) {
   std::chrono::steady_clock::time_point begin =
       std::chrono::steady_clock::now();
 
-  auto scene  = scene_;
   auto lights = lights_;
 
   int photons_per_light = 1000000;  // Fotones lanzados por fuente de luz
@@ -143,7 +138,6 @@ void sample_photons(const scene_model& scene_, const bvh_scene& bvh,
     }
 
     for (int i = 0; i < photons_per_light; i++) {
-      std::cout << "Foton " << i << std::endl;
 
       ray3f random_ray = sample_random_ray(light, scene, rng);
       // Aqui random position tiene que ser la posicion desde que se va a
@@ -163,7 +157,6 @@ void sample_photons(const scene_model& scene_, const bvh_scene& bvh,
       p.position             = random_ray.o;
       p.direction            = random_ray.d;
       trace_photon(scene, bvh, p, m_caustics_map, rng);
-      
     }
   }
   if (m_caustics_map.size() > 0)
