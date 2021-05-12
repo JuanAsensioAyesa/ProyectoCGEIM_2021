@@ -16,7 +16,7 @@ namespace yocto {
 struct Photon;
 void sample_photons(const scene_model& scene, const bvh_scene& bvh,
     const trace_lights& lights, rng_state& rng,
-    KDTree<Photon, 3>& m_caustics_map);
+    KDTree<Photon, 3>* m_caustics_map);
 
 // Structure defining a photon (a directionally-resolved packet of
 // energy), that will be used later for radiance estimation.

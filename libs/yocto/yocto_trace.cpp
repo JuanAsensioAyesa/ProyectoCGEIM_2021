@@ -1377,7 +1377,7 @@ void trace_samples(trace_state& state, const scene_model& scene,
 
     if (params.sampler == trace_sampler_type::photon_map) {
       m_caustics_map = KDTree<Photon, 3>();
-      sample_photons(scene, bvh, lights, rng, m_caustics_map);
+      sample_photons(scene, bvh, lights, rng, &m_caustics_map);
       std::cout << "Fotones " << m_caustics_map.size() << std::endl;
     }
   }

@@ -73,7 +73,9 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
   bool end                 = false;
 
   // Iterate the path
-  while (1) {
+  int guardados = 0;
+  while (i < 8) {
+    i++;
     // Throw ray and update current_it
     auto intersection = intersect_bvh(bvh, scene, photon_ray);
     if (intersection.hit) {
@@ -98,6 +100,7 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
         photon_ray.d  = incoming;
       } else {
         if (is_caustic_particle) {
+          // std::cout << "GUARDADO" << std::endl;
           auto& instance         = scene.instances[intersection.instance];
           auto  element          = intersection.element;
           auto  uv               = intersection.uv;
@@ -108,21 +111,19 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
           pos.push_back(position.z);
           p.position  = position;
           p.direction = photon_ray.d;
-          m_caustics_map.store(pos, p);
+          m_caustics_map->store(pos, p);
         }
         is_caustic_particle = false;
         end                 = true;
         break;
       }
     }
-
-    is_caustic_particle = false;
-    return true;
   }
+  return true;
 }
 void sample_photons(const scene_model& scene, const bvh_scene& bvh,
     const trace_lights& lights_, rng_state& rng,
-    KDTree<Photon, 3>& m_caustics_map) {
+    KDTree<Photon, 3>* m_caustics_map) {
   std::chrono::steady_clock::time_point begin =
       std::chrono::steady_clock::now();
 
@@ -136,6 +137,7 @@ void sample_photons(const scene_model& scene, const bvh_scene& bvh,
     }
 
     for (int i = 0; i < photons_per_light; i++) {
+      // std::cout << "Foton " << i << std::endl;
       ray3f random_ray = sample_random_ray(light, scene, rng);
       // Aqui random position tiene que ser la posicion desde que se va a
       // lanzar el foton, y random_position_normal la normal en ese punto
@@ -158,11 +160,12 @@ void sample_photons(const scene_model& scene, const bvh_scene& bvh,
       trace_photon(scene, bvh, p, m_caustics_map, rng);
     }
   }
-  if (m_caustics_map.size() > 0) m_caustics_map.balance();
+  m_caustics_map->balance();
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
   std::cout << "Lanzados " << photons_per_light * lights.lights.size()
-            << " intersectan: " << m_caustics_map.size() << "    " << std::endl;
+            << " intersectan: " << m_caustics_map->size() << "    "
+            << std::endl;
 
   std::cout << "Porcentaje "
             << float(intersectados) /
