@@ -55,79 +55,75 @@ ray3f sample_random_ray(
   return random_ray;
 }
 
-
-bool trace_photon(const scene_model& scene_, const bvh_scene& bvh, Photon &p, KDTree<Photon, 3>& m_caustics_map, rng_state& rng)
-{
+bool trace_photon(const scene_model& scene_, const bvh_scene& bvh, Photon& p,
+    KDTree<Photon, 3>& m_caustics_map, rng_state& rng) {
 #ifndef MAX_PHOTON_ITERATIONS
 #define MAX_PHOTON_ITERATIONS 7
 #endif
   auto scene = scene_;
 
-	// Compute irradiance photon's energy
-	vec3f energy = p.flux;
+  // Compute irradiance photon's energy
+  vec3f energy = p.flux;
 
-	ray3f photon_ray;
+  ray3f photon_ray;
   photon_ray.o = p.position;
   photon_ray.d = p.direction;
 
-	bool is_caustic_particle = false;
-  int i= 0;
-	//Iterate the path
-	while (1)
-	{
-		// Throw ray and update current_it
-		auto intersection = intersect_bvh(bvh, scene, photon_ray);
-    std::cout << intersection.hit << std::endl;
-      if (intersection.hit) {
-        auto instance_id           = intersection.instance;
-        auto instance_intersection = scene.instances[instance_id];
-        auto intersection_material = instance_intersection.material;
-        if (scene.materials[intersection_material].type ==
+  bool is_caustic_particle = false;
+  int  i                   = 0;
+  // Iterate the path
+  while (1) {
+    i++;
+    // Throw ray and update current_it
+    auto intersection = intersect_bvh(bvh, scene, photon_ray);
+    // std::cout << intersection.hit << std::endl;
+    if (intersection.hit) {
+      auto instance_id           = intersection.instance;
+      auto instance_intersection = scene.instances[instance_id];
+      auto intersection_material = instance_intersection.material;
+      if (scene.materials[intersection_material].type ==
           scene_material_type::refractive) {
-             is_caustic_particle = true;
-             //calcular siguiente rayo y esas cosas
-             auto  outgoing = -photon_ray.d;
-             auto& instance = scene.instances[intersection.instance];
-             auto  element  = intersection.element;
-             auto  uv       = intersection.uv;
-             auto  position = eval_position(scene, instance, element, uv);
-             auto normal = eval_shading_normal(scene, instance, element, uv, outgoing);
-            auto material = eval_material(scene, instance, element, uv);
-            auto incoming = sample_refractive(material.color, material.ior, material.roughness,
-                              normal, outgoing, rand1f(rng), rand2f(rng));
-            photon_ray.o = position;
-            photon_ray.d = incoming;
+        is_caustic_particle = true;
+        // calcular siguiente rayo y esas cosas
+        auto  outgoing = -photon_ray.d;
+        auto& instance = scene.instances[intersection.instance];
+        auto  element  = intersection.element;
+        auto  uv       = intersection.uv;
+        auto  position = eval_position(scene, instance, element, uv);
+        auto  normal   = eval_shading_normal(
+            scene, instance, element, uv, outgoing);
+        auto material = eval_material(scene, instance, element, uv);
+        auto incoming = sample_refractive(material.color, material.ior,
+            material.roughness, normal, outgoing, rand1f(rng), rand2f(rng));
+        photon_ray.o  = position;
+        photon_ray.d  = incoming;
+      } else {
+        if (is_caustic_particle) {
+          auto& instance         = scene.instances[intersection.instance];
+          auto  element          = intersection.element;
+          auto  uv               = intersection.uv;
+          auto  position         = eval_position(scene, instance, element, uv);
+          std::vector<float> pos = std::vector<float>();
+          pos.push_back(position.x);
+          pos.push_back(position.y);
+          pos.push_back(position.z);
+          p.position  = position;
+          p.direction = photon_ray.d;
+          // std::cout << position.x << " " << position.y << " " << position.z
+          //           << std::endl;
+          m_caustics_map.store(pos, p);
         }
-        else {
-          if (is_caustic_particle){
-              auto& instance         = scene.instances[intersection.instance];
-              auto  element          = intersection.element;
-              auto  uv               = intersection.uv;
-              auto  position         = eval_position(scene, instance, element, uv);
-              std::vector<float> pos = std::vector<float>();
-              pos.push_back(position.x);
-              pos.push_back(position.y);
-              pos.push_back(position.z);
-              p.position = position;
-              p.direction = photon_ray.d;
-              // std::cout << position.x << " " << position.y << " " << position.z
-              //           << std::endl;
-              m_caustics_map.store(pos, p);
-          }
-          is_caustic_particle = false;
-          break;
-        }
+        is_caustic_particle = false;
+        break;
       }
-		  else
-  			break;
+    } else
+      break;
 
-		
-			is_caustic_particle = false;
-		}
+    is_caustic_particle = false;
+  }
 
-	return true;
+  return true;
 }
-
 
 void sample_photons(const scene_model& scene_, const bvh_scene& bvh,
     const trace_lights& lights_, rng_state& rng,
@@ -152,24 +148,29 @@ void sample_photons(const scene_model& scene_, const bvh_scene& bvh,
       // Aqui random position tiene que ser la posicion desde que se va a
       // lanzar el foton, y random_position_normal la normal en ese punto
       Photon p = Photon();
-      vec3f light_power      = scene.materials[scene.instances[light.instance].shape].emission;
-      float light_area       = 0;
-      auto light_shape       = scene.shapes[scene.instances[light.instance].shape];
-      for (auto quad : light_shape.quads){
-        vec3f p0   = light_shape.positions[quad.x];
-        vec3f p1   = light_shape.positions[quad.y];
-        vec3f p2   = light_shape.positions[quad.z];
-        vec3f p3   = light_shape.positions[quad.w];
+      vec3f  light_power =
+          scene.materials[scene.instances[light.instance].shape].emission;
+      float light_area  = 0;
+      auto  light_shape = scene.shapes[scene.instances[light.instance].shape];
+      for (auto quad : light_shape.quads) {
+        vec3f p0 = light_shape.positions[quad.x];
+        vec3f p1 = light_shape.positions[quad.y];
+        vec3f p2 = light_shape.positions[quad.z];
+        vec3f p3 = light_shape.positions[quad.w];
         light_area += quad_area(p0, p1, p2, p3);
       }
-      p.flux                 = light_power / (photons_per_light * (1 / (2 * pif))* (1 / light_area));
-      p.position             = random_ray.o;
-      p.direction            = random_ray.d;
+      p.flux = light_power /
+               (photons_per_light * (1 / (2 * pif)) * (1 / light_area));
+      p.position  = random_ray.o;
+      p.direction = random_ray.d;
+      // std::cout << "TRACE PHOTON IN " << std::endl;
       trace_photon(scene, bvh, p, m_caustics_map, rng);
-      
+      // std::cout << "TRACE PHOTON OUT " << std::endl;
+
       // std::cout << "Hola 2" << std::endl;
     }
   }
+
   m_caustics_map.balance();
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
