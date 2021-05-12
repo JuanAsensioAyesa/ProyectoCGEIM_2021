@@ -77,7 +77,6 @@ bool trace_photon(const scene_model& scene_, const bvh_scene& bvh, Photon &p, KD
 	{
 		// Throw ray and update current_it
 		auto intersection = intersect_bvh(bvh, scene, photon_ray);
-    std::cout << intersection.hit << std::endl;
       if (intersection.hit) {
         auto instance_id           = intersection.instance;
         auto instance_intersection = scene.instances[instance_id];
@@ -110,8 +109,6 @@ bool trace_photon(const scene_model& scene_, const bvh_scene& bvh, Photon &p, KD
               pos.push_back(position.z);
               p.position = position;
               p.direction = photon_ray.d;
-              // std::cout << position.x << " " << position.y << " " << position.z
-              //           << std::endl;
               m_caustics_map.store(pos, p);
           }
           is_caustic_particle = false;
@@ -146,7 +143,7 @@ void sample_photons(const scene_model& scene_, const bvh_scene& bvh,
     }
 
     for (int i = 0; i < photons_per_light; i++) {
-      // std::cout << "Foton " << i << std::endl;
+      std::cout << "Foton " << i << std::endl;
 
       ray3f random_ray = sample_random_ray(light, scene, rng);
       // Aqui random position tiene que ser la posicion desde que se va a
@@ -167,10 +164,10 @@ void sample_photons(const scene_model& scene_, const bvh_scene& bvh,
       p.direction            = random_ray.d;
       trace_photon(scene, bvh, p, m_caustics_map, rng);
       
-      // std::cout << "Hola 2" << std::endl;
     }
   }
-  m_caustics_map.balance();
+  if (m_caustics_map.size() > 0)
+    m_caustics_map.balance();
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
   std::cout << "Lanzados " << photons_per_light * lights.lights.size()
