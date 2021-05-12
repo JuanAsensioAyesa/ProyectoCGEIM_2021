@@ -1190,7 +1190,7 @@ static trace_result trace_photon_map(const scene_model& scene,
   std::vector<const KDTree<Photon, 3>::Node*> nodes_g;
 
   // std::cout << "hola" << std::endl;
-  int   m_nb_photons = 100;
+  int   m_nb_photons = 50;
   float max_distance = 0;
 
   m_caustics_map.find(p, m_nb_photons, nodes_g, max_distance);

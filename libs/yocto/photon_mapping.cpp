@@ -74,7 +74,7 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
 
   // Iterate the path
   int guardados = 0;
-  while (i < 8) {
+  while (i < 16) {
     i++;
     // Throw ray and update current_it
     auto intersection = intersect_bvh(bvh, scene, photon_ray);

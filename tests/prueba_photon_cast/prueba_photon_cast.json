@@ -70,14 +70,9 @@
       "material": "largearealight2"
     },
     "sphere-plastic-sharp": {
-      "shape": "bunny",
-      "frame": [1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4, 0, 0],
+      "shape": "Gemstone",
+      "frame": [1, 0, 0, 0, 0, 1, 0, 1, 0, -0.4, 0.1, 0],
       "material": "sphere-refractive"
-    },
-    "sphere-plastic-sharp2": {
-      "shape": "sphere",
-      "frame": [1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0, 0],
-      "material": "sphere-matte"
     }
   },
   "materials": {
