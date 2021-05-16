@@ -50,7 +50,7 @@
   },
   "environments": {
     "sky": {
-      "emission": [0.5, 0.5, 0.5],
+      "emission": [0.0, 0.0, 0.0],
       "emission_tex": "sky"
     }
   },
@@ -60,17 +60,17 @@
       "material": "floor"
     },
     "largearealight1": {
-      "shape": "largearealight1",
-      "lookat": [-0.8, 1.6, 1.6, 0, 0.1, 0, 0, 1, 0],
+      "shape": "arealight1",
+      "frame": [1, 0, 0, 0, 0, 1, 0, -1, 0, -0.2, 1.0, 0],
       "material": "largearealight1"
     },
-    "largearealight2": {
-      "shape": "largearealight2",
-      "lookat": [0.8, 1.6, 1.6, 0, 0.1, 0, 0, 1, 0],
-      "material": "largearealight2"
+    "sphere-plastic-sharp2": {
+      "shape": "sphere_deformed",
+      "frame": [1, 0, 0, 0, 0, 1, 0, 1, 0, 0.0, 0.1, 0],
+      "material": "sphere-refractive2"
     },
     "sphere-plastic-sharp": {
-      "shape": "glass_deformed",
+      "shape": "sphere_deformed",
       "frame": [1, 0, 0, 0, 0, 1, 0, 1, 0, 0.0, 0.3, 0],
       "material": "sphere-refractive"
     }
@@ -91,8 +91,13 @@
     },
     "sphere-refractive": {
       "type": "refractive",
-      "color": [1, 1, 1],
-      "roughness": 0.1
+      "color": [0, 0, 1],
+      "roughness": 0.0
+    },
+    "sphere-refractive2": {
+      "type": "refractive",
+      "color": [1, 0, 0],
+      "roughness": 0.0
     },
     "sphere-plastic-rough": {
       "type": "glossy",

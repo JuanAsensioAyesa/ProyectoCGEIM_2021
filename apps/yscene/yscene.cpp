@@ -174,6 +174,8 @@ void add_command(cli_command& cli, const string& name, render_params& params,
   add_option(
       cmd, "highqualitybvh", params.highqualitybvh, "Use high quality BVH.");
   add_option(cmd, "noparallel", params.noparallel, "Disable threading.");
+  add_option(
+      cmd, "photon_mapping", params.photon_mapping, "Enable photon mapping.");
 }
 
 // convert images

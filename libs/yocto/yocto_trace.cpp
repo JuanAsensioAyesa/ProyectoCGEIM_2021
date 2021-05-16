@@ -352,7 +352,8 @@ struct trace_result {
   vec3f albedo   = {0, 0, 0};
   vec3f normal   = {0, 0, 0};
 };
-
+// CAUSTIC MAP
+KDTree<Photon, 3> m_caustics_map;
 // Recursive path tracing.
 static trace_result trace_path(const scene_model& scene, const bvh_scene& bvh,
     const trace_lights& lights, const ray3f& ray_, rng_state& rng,
@@ -426,6 +427,34 @@ static trace_result trace_path(const scene_model& scene, const bvh_scene& bvh,
       // accumulate emission
       radiance += weight * eval_emission(material, normal, outgoing);
 
+      // Prueba causticas
+      if (params.photon_mapping && bounce == 0) {
+        std::vector<float> p = std::vector<float>();
+        p.push_back(position.x);
+        p.push_back(position.y);
+        p.push_back(position.z);
+        std::vector<const KDTree<Photon, 3>::Node*> nodes_g;
+
+        // std::cout << "hola" << std::endl;
+        int   m_nb_photons = 100;
+        float max_distance = 0;
+
+        m_caustics_map.find(p, m_nb_photons, nodes_g, max_distance);
+
+        // std::cout << position.x << " " << position.y << " " << position.z
+        //           << std::endl;
+        // int photons = nodes_g.size();
+        // std::cout << m_caustics_map.size() << std::endl;
+        // std::cout << m_caustics_map.size() << std::endl;
+        int   total      = m_caustics_map.size();
+        vec3f total_flux = vec3f{0.0, 0.0, 0.0};
+        for (auto node : nodes_g) {
+          auto photon = node->data();
+          total_flux  = total_flux + photon.flux * photon.color;
+        }
+        radiance += total_flux /
+                    (float(total) * 3.1415 * max_distance * max_distance);
+      }
       // next direction
       auto incoming = zero3f;
       if (!is_delta(material)) {
@@ -1159,7 +1188,7 @@ static trace_result trace_falsecolor(const scene_model& scene,
   // done
   return {srgb_to_rgb(result), true, material.color, normal};
 }
-KDTree<Photon, 3>   m_caustics_map;
+
 static trace_result trace_photon_map(const scene_model& scene,
     const bvh_scene& bvh, const trace_lights& lights, const ray3f& ray_,
     rng_state& rng, const trace_params& params) {
@@ -1190,7 +1219,7 @@ static trace_result trace_photon_map(const scene_model& scene,
   std::vector<const KDTree<Photon, 3>::Node*> nodes_g;
 
   // std::cout << "hola" << std::endl;
-  int   m_nb_photons = 50;
+  int   m_nb_photons = 100;
   float max_distance = 0;
 
   m_caustics_map.find(p, m_nb_photons, nodes_g, max_distance);
@@ -1200,9 +1229,13 @@ static trace_result trace_photon_map(const scene_model& scene,
   int photons = nodes_g.size();
   // std::cout << m_caustics_map.size() << std::endl;
   // std::cout << m_caustics_map.size() << std::endl;
-  int total = m_caustics_map.size();
-  radiance  = vec3f{1, 1, 1} * 1 * float(photons) /
-             (float(total) * 3.1415 * max_distance);
+  int   total      = m_caustics_map.size();
+  vec3f total_flux = vec3f{0.0, 0.0, 0.0};
+  for (auto node : nodes_g) {
+    auto photon = node->data();
+    total_flux  = total_flux + photon.flux * photon.color;
+  }
+  radiance = total_flux / (float(total) * 3.1415 * max_distance * max_distance);
   // radiance  = vec3f{normal.x, normal.y, normal.z};
   return {radiance, true, hit_albedo, hit_normal};
 }
@@ -1375,10 +1408,11 @@ void trace_samples(trace_state& state, const scene_model& scene,
   if (state.samples == 0) {
     auto rng = make_rng(1301081);
 
-    if (params.sampler == trace_sampler_type::photon_map) {
+    if (params.photon_mapping ||
+        params.sampler == trace_sampler_type::photon_map) {
       m_caustics_map = KDTree<Photon, 3>();
       sample_photons(scene, bvh, lights, rng, &m_caustics_map);
-      std::cout << "Fotones " << m_caustics_map.size() << std::endl;
+      // std::cout << "Fotones " << m_caustics_map.size() << std::endl;
     }
   }
   if (state.samples >= params.samples) return;

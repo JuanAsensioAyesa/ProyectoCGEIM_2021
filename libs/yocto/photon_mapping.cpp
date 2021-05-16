@@ -4,7 +4,18 @@
 #include <iostream>
 
 #include "yocto_geometry.h"
+#include "yocto_math.h"
 namespace yocto {
+
+void absorb_color(Photon& p, vec3f color) {
+  for (int i = 0; i < 3; i++) {
+    if (p.color[i] == 0) {
+      p.color[i] = color[i];
+    } else {
+      p.color[i] *= color[i];
+    }
+  }
+}
 
 ray3f sample_random_ray(
     yocto::trace_light light, const scene_model& scene, rng_state& rng) {
@@ -82,6 +93,7 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
       auto instance_id           = intersection.instance;
       auto instance_intersection = scene.instances[instance_id];
       auto intersection_material = instance_intersection.material;
+
       if (scene.materials[intersection_material].type ==
           scene_material_type::refractive) {
         is_caustic_particle = true;
@@ -98,6 +110,9 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
             material.roughness, normal, outgoing, rand1f(rng), rand2f(rng));
         photon_ray.o  = position;
         photon_ray.d  = incoming;
+        energy        = energy / 1.5;
+        absorb_color(p, material.color);
+
       } else {
         if (is_caustic_particle) {
           // std::cout << "GUARDADO" << std::endl;
@@ -109,6 +124,7 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
           pos.push_back(position.x);
           pos.push_back(position.y);
           pos.push_back(position.z);
+          p.flux      = energy;
           p.position  = position;
           p.direction = photon_ray.d;
           m_caustics_map->store(pos, p);
@@ -153,8 +169,11 @@ void sample_photons(const scene_model& scene, const bvh_scene& bvh,
         vec3f p3 = light_shape.positions[quad.w];
         light_area += quad_area(p0, p1, p2, p3);
       }
-      p.flux = light_power /
+
+      p.flux = light_power * 10000. /
                (photons_per_light * (1 / (2 * pif)) * (1 / light_area));
+      // std::cout << p.flux.x << " " << p.flux.y << " " << p.flux.z << " "
+      //          << std::endl;
       p.position  = random_ray.o;
       p.direction = random_ray.d;
       trace_photon(scene, bvh, p, m_caustics_map, rng);
@@ -163,18 +182,18 @@ void sample_photons(const scene_model& scene, const bvh_scene& bvh,
   m_caustics_map->balance();
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
-  std::cout << "Lanzados " << photons_per_light * lights.lights.size()
-            << " intersectan: " << m_caustics_map->size() << "    "
-            << std::endl;
+  // std::cout << "Lanzados " << photons_per_light * lights.lights.size()
+  //         << " intersectan: " << m_caustics_map->size() << "    "
+  //         << std::endl;
 
-  std::cout << "Porcentaje "
-            << float(intersectados) /
-                   float(photons_per_light * lights.lights.size())
-            << " Tiempo: "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(
-                   end - begin)
-                   .count()
-            << "ms" << std::endl;
+  // std::cout << "Porcentaje "
+  // << float(intersectados) /
+  //        float(photons_per_light * lights.lights.size())
+  // << " Tiempo: "
+  // << std::chrono::duration_cast<std::chrono::milliseconds>(
+  //        end - begin)
+  //        .count()
+  // << "ms" << std::endl;
 }
 
 }  // namespace yocto

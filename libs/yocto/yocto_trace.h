@@ -113,11 +113,19 @@ struct trace_params {
   float                 exposure       = 0;
   bool                  filmic         = false;
   bool                  denoise        = false;
+  bool                  photon_mapping = false;
 };
 
-inline const auto trace_sampler_names = std::vector<std::string>{"path",
-    "pathdirect", "pathmis", "naive", "eyelight", "eyelightao", "falsecolor",
-    "photon_map"};
+inline const auto trace_sampler_names = std::vector<std::string>{
+    "path",
+    "pathdirect",
+    "pathmis",
+    "naive",
+    "eyelight",
+    "eyelightao",
+    "falsecolor",
+    "photon_map",
+};
 
 inline const auto trace_falsecolor_names = vector<string>{"position", "normal",
     "frontfacing", "gnormal", "gfrontfacing", "texcoord", "mtype", "color",

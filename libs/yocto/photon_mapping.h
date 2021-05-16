@@ -24,7 +24,7 @@ struct Photon {
   vec3f position;
   vec3f direction;
   vec3f flux;
-
+  vec3f color;
   Photon() {
     position.x = 0.0;
     position.y = 0.0;
@@ -37,6 +37,7 @@ struct Photon {
     flux.x = 0.0;
     flux.y = 0.0;
     flux.z = 0.0;
+    color  = vec3f{1.0, 1.0, 1.0};
   }
   Photon(const vec3f& p, const vec3f& d, const vec3f& f)
       : position(p), direction(d), flux(f) {}
