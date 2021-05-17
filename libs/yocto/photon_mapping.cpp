@@ -11,7 +11,7 @@ void absorb_color(Photon& p, vec3f color) {
   for (int i = 0; i < 3; i++) {
     if (p.color[i] == 0) {
       p.color[i] = color[i];
-    } else {
+    } else if (color[i] != 0 ){
       p.color[i] *= color[i];
     }
   }
