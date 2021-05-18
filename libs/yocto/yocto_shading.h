@@ -475,8 +475,8 @@ inline vec3f sample_microfacet(float roughness, const vec3f& normal,
     // zero)
     auto lensq = Vh.x * Vh.x + Vh.y * Vh.y;
     auto T1    = lensq > 0 ? vec3f{-Vh.y, Vh.x, 0} * (1 / sqrt(lensq))
-                           : vec3f{1, 0, 0};
-    auto T2    = cross(Vh, T1);
+                        : vec3f{1, 0, 0};
+    auto T2 = cross(Vh, T1);
     // Section 4.2: parameterization of the projected area
     auto r   = sqrt(rn.y);
     auto phi = 2 * pif * rn.x;
@@ -918,15 +918,15 @@ inline float sample_refractive_pdf(const vec3f& color, float ior,
 inline vec3f eval_refractive(const vec3f& color, float ior, const vec3f& normal,
     const vec3f& outgoing, const vec3f& incoming) {
   if (abs(ior - 1) < 1e-3)
-    return dot(normal, incoming) * dot(normal, outgoing) <= 0 ? vec3f{1, 1, 1}
+    return dot(normal, incoming) * dot(normal, outgoing) <= 0 ? color
                                                               : vec3f{0, 0, 0};
   auto entering  = dot(normal, outgoing) >= 0;
   auto up_normal = entering ? normal : -normal;
   auto rel_ior   = entering ? ior : (1 / ior);
   if (dot(normal, incoming) * dot(normal, outgoing) >= 0) {
-    return vec3f{1, 1, 1} * fresnel_dielectric(rel_ior, up_normal, outgoing);
+    return color * fresnel_dielectric(rel_ior, up_normal, outgoing);
   } else {
-    return vec3f{1, 1, 1} * (1 / (rel_ior * rel_ior)) *
+    return color * (1 / (rel_ior * rel_ior)) *
            (1 - fresnel_dielectric(rel_ior, up_normal, outgoing));
   }
 }

@@ -1232,7 +1232,7 @@ static trace_result trace_photon_map(const scene_model& scene,
   vec3f total_flux = vec3f{0.0, 0.0, 0.0};
   for (auto node : nodes_g) {
     auto photon = node->data();
-    total_flux  = total_flux + photon.flux * photon.color;
+    total_flux  = total_flux + photon.flux;  //* photon.color;
   }
   radiance = total_flux / (3.1415 * max_distance * max_distance);
   // radiance  = vec3f{normal.x, normal.y, normal.z};

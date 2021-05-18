@@ -17,8 +17,8 @@ void absorb_color(Photon& p, vec3f color) {
   }
 }
 
-ray3f sample_random_ray(
-    yocto::trace_light light, const scene_model& scene, rng_state& rng) {
+ray3f sample_random_ray(yocto::trace_light light, const scene_model& scene,
+    rng_state& rng, vec3f& light_normal) {
   auto  light_instance = scene.instances[light.instance];
   int   light_shape_id = light_instance.shape;
   auto  light_shape    = scene.shapes[light_shape_id];
@@ -59,6 +59,7 @@ ray3f sample_random_ray(
   }
   ray3f random_ray;
   if (valid) {
+    light_normal           = random_position_normal;
     vec3f random_direction = sample_hemisphere_cos(
         random_position_normal, random_uv);
     random_ray = ray3f{random_position, random_direction};
@@ -110,8 +111,9 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
             material.roughness, normal, outgoing, rand1f(rng), rand2f(rng));
         photon_ray.o  = position;
         photon_ray.d  = incoming;
-        energy        = energy / 1.5;
-        absorb_color(p, material.color);
+        energy = energy * eval_refractive(material.color, material.ior, normal,
+                              outgoing, incoming);
+        // absorb_color(p, material.color);
 
       } else {
         if (is_caustic_particle) {
@@ -151,10 +153,10 @@ void sample_photons(const scene_model& scene, const bvh_scene& bvh,
     if (light.instance == invalidid) {
       continue;  // Si no se hace esto hay segmentation fault;
     }
-
+    vec3f light_normal;
     for (int i = 0; i < photons_per_light; i++) {
       // std::cout << "Foton " << i << std::endl;
-      ray3f random_ray = sample_random_ray(light, scene, rng);
+      ray3f random_ray = sample_random_ray(light, scene, rng, light_normal);
       // Aqui random position tiene que ser la posicion desde que se va a
       // lanzar el foton, y random_position_normal la normal en ese punto
       Photon p = Photon();
@@ -170,8 +172,10 @@ void sample_photons(const scene_model& scene, const bvh_scene& bvh,
         light_area += quad_area(p0, p1, p2, p3);
       }
       // cos(alpha)/pi
-      p.flux = light_power * 1. /
-               (photons_per_light * (1 / (2 * pif)) * (1 / light_area));
+      auto cos = dot(light_normal, random_ray.d);
+      // std::cout << cos << std::endl;
+      p.flux = light_power /
+               (photons_per_light * (cos / (pif)) * (1 / light_area));
       // std::cout << p.flux.x << " " << p.flux.y << " " << p.flux.z << " "
       //          << std::endl;
       p.position  = random_ray.o;
