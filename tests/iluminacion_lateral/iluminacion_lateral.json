@@ -65,8 +65,8 @@
       "material": "largearealight1"
     },
     "sphere-plastic-sharp": {
-      "shape": "sphere_deformed",
-      "frame": [1, 0, 0, 0, 0, 1, 0, 1, 0, 0.0, 0.0, 0],
+      "shape": "Gemstone",
+      "frame": [1, 0, 0, 0, 0, 1, 0, 1, 0, 0.0, 0.05, 0],
       "material": "sphere-refractive"
     }
   },

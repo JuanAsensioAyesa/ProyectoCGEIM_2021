@@ -436,7 +436,7 @@ static trace_result trace_path(const scene_model& scene, const bvh_scene& bvh,
         std::vector<const KDTree<Photon, 3>::Node*> nodes_g;
 
         // std::cout << "hola" << std::endl;
-        int   m_nb_photons = 100;
+        int   m_nb_photons = 200;
         float max_distance = 0;
 
         m_caustics_map.find(p, m_nb_photons, nodes_g, max_distance);
@@ -450,10 +450,9 @@ static trace_result trace_path(const scene_model& scene, const bvh_scene& bvh,
         vec3f total_flux = vec3f{0.0, 0.0, 0.0};
         for (auto node : nodes_g) {
           auto photon = node->data();
-          total_flux  = total_flux + photon.flux * photon.color;
+          total_flux  = total_flux + photon.flux;  //* photon.color;
         }
-        radiance += total_flux /
-                    (float(total) * 3.1415 * max_distance * max_distance);
+        radiance += total_flux / (3.1415 * max_distance * max_distance);
       }
       // next direction
       auto incoming = zero3f;
@@ -1235,7 +1234,7 @@ static trace_result trace_photon_map(const scene_model& scene,
     auto photon = node->data();
     total_flux  = total_flux + photon.flux * photon.color;
   }
-  radiance = total_flux / (float(total) * 3.1415 * max_distance * max_distance);
+  radiance = total_flux / (3.1415 * max_distance * max_distance);
   // radiance  = vec3f{normal.x, normal.y, normal.z};
   return {radiance, true, hit_albedo, hit_normal};
 }

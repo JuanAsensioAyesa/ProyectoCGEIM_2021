@@ -11,7 +11,7 @@ void absorb_color(Photon& p, vec3f color) {
   for (int i = 0; i < 3; i++) {
     if (p.color[i] == 0) {
       p.color[i] = color[i];
-    } else if (color[i] != 0 ){
+    } else if (color[i] != 0) {
       p.color[i] *= color[i];
     }
   }
@@ -169,8 +169,8 @@ void sample_photons(const scene_model& scene, const bvh_scene& bvh,
         vec3f p3 = light_shape.positions[quad.w];
         light_area += quad_area(p0, p1, p2, p3);
       }
-
-      p.flux = light_power * 10000. /
+      // cos(alpha)/pi
+      p.flux = light_power * 1. /
                (photons_per_light * (1 / (2 * pif)) * (1 / light_area));
       // std::cout << p.flux.x << " " << p.flux.y << " " << p.flux.z << " "
       //          << std::endl;
