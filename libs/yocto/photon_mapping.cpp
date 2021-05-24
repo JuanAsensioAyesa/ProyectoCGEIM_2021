@@ -186,9 +186,9 @@ void sample_photons(const scene_model& scene, const bvh_scene& bvh,
   m_caustics_map->balance();
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
-  // std::cout << "Lanzados " << photons_per_light * lights.lights.size()
-  //         << " intersectan: " << m_caustics_map->size() << "    "
-  //         << std::endl;
+  std::cout << "Lanzados " << photons_per_light * lights.lights.size()
+            << " intersectan: " << m_caustics_map->size() << "    "
+            << std::endl;
 
   // std::cout << "Porcentaje "
   // << float(intersectados) /

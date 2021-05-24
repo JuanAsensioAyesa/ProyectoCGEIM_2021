@@ -60,14 +60,15 @@
       "material": "floor"
     },
     "largearealight1": {
-      "shape": "arealight1",
-      "frame": [1, 0, 0, 0, 0, 1, 0, -1, 0, 0.0, 1.0, 0],
+      "shape": "sphere_little",
+      "frame": [1, 0, 0, 0, 0, 1, 0, -1, 0, -0, 0.25, 0],
+
       "material": "largearealight1"
     },
-    "sphere-plastic-sharp1": {
-      "shape": "glass_deformed",
-      "frame": [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0.3, 0],
-      "material": "sphere-refractive2"
+    "refractive": {
+      "shape": "pelota_curva",
+      "frame": [1, 0, 0, 0, 0, 1, 0, -1, 0, 0.0, 0.3, 0],
+      "material": "sphere-refractive"
     }
   },
   "materials": {
@@ -86,12 +87,12 @@
     },
     "sphere-refractive": {
       "type": "refractive",
-      "color": [0, 0, 1],
+      "color": [0.2, 0.2, 1],
       "roughness": 0
     },
     "sphere-refractive2": {
       "type": "refractive",
-      "color": [1, 1, 1],
+      "color": [1, 0.2, 0.2],
       "roughness": 0
     },
     "sphere-plastic-rough": {
