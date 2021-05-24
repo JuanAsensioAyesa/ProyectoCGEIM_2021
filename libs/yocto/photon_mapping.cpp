@@ -193,6 +193,8 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
                   sample_scattering_pdf(vsdf, outgoing, incoming);
 
         // setup next iteration
+        photon_ray.o = position;
+        photon_ray.d = incoming;
       }
       auto  element  = intersection.element;
       auto  uv       = intersection.uv;
