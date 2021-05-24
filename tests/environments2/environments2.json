@@ -51,7 +51,7 @@
   "environments": {
     "sky": {
       "emission": [1, 1, 1],
-      "emission_tex": "sky"
+      "emission_tex": "venice_sunset_2k"
     }
   },
   "instances": {
@@ -64,20 +64,20 @@
       "frame": [1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4, 0, 0],
       "material": "bunny-uvgrid"
     },
-    "sphere-plastic-sharp": {
+    "sphere-glossy-sharp": {
       "shape": "sphere",
       "frame": [1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0, 0],
-      "material": "sphere-plastic-sharp"
+      "material": "sphere-glossy-sharp"
     },
     "bunny-metal-rough": {
       "shape": "bunny",
       "frame": [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
       "material": "bunny-metal-rough"
     },
-    "sphere-plastic-rough": {
+    "sphere-glossy-rough": {
       "shape": "sphere",
       "frame": [1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0, 0],
-      "material": "sphere-plastic-rough"
+      "material": "sphere-glossy-rough"
     },
     "bunny-metal-sharp": {
       "shape": "bunny",
@@ -91,13 +91,13 @@
       "color_tex": "floor"
     },
     "bunny-uvgrid": {
-      "type": "plastic",
+      "type": "glossy",
       "color": [1, 1, 1],
       "roughness": 0.1,
       "color_tex": "uvgrid"
     },
-    "sphere-plastic-sharp": {
-      "type": "plastic",
+    "sphere-glossy-sharp": {
+      "type": "glossy",
       "color": [0.5, 0.5, 0.7],
       "roughness": 0.01
     },
@@ -106,8 +106,8 @@
       "color": [0.66, 0.45, 0.34],
       "roughness": 0.2
     },
-    "sphere-plastic-rough": {
-      "type": "plastic",
+    "sphere-glossy-rough": {
+      "type": "glossy",
       "color": [0.5, 0.7, 0.5],
       "roughness": 0.2
     },

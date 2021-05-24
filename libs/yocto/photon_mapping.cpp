@@ -66,7 +66,24 @@ ray3f sample_random_ray(yocto::trace_light light, const scene_model& scene,
   }
   return random_ray;
 }
+static vec3f eval_scattering(const material_point& material,
+    const vec3f& outgoing, const vec3f& incoming) {
+  if (material.density == zero3f) return zero3f;
+  return material.scattering * material.density *
+         eval_phasefunction(material.scanisotropy, outgoing, incoming);
+}
 
+static vec3f sample_scattering(const material_point& material,
+    const vec3f& outgoing, float rnl, const vec2f& rn) {
+  if (material.density == zero3f) return zero3f;
+  return sample_phasefunction(material.scanisotropy, outgoing, rn);
+}
+
+static float sample_scattering_pdf(const material_point& material,
+    const vec3f& outgoing, const vec3f& incoming) {
+  if (material.density == zero3f) return 0;
+  return sample_phasefunction_pdf(material.scanisotropy, outgoing, incoming);
+}
 bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
     KDTree<Photon, 3>* m_caustics_map, rng_state& rng) {
 #ifndef MAX_PHOTON_ITERATIONS
@@ -85,7 +102,11 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
   bool end                 = false;
 
   // Iterate the path
-  int guardados = 0;
+  auto  volume_stack = vector<material_point>{};
+  int   guardados    = 0;
+  vec3f outgoing;
+  vec3f incoming;
+  vec3f normal;
   while (i < 16) {
     i++;
     // Throw ray and update current_it
@@ -95,46 +116,87 @@ bool trace_photon(const scene_model& scene, const bvh_scene& bvh, Photon& p,
       auto instance_intersection = scene.instances[instance_id];
       auto intersection_material = instance_intersection.material;
 
-      if (scene.materials[intersection_material].type ==
-          scene_material_type::refractive) {
-        is_caustic_particle = true;
-        // calcular siguiente rayo y esas cosas
-        auto  outgoing = -photon_ray.d;
+      auto in_volume = false;
+      if (!volume_stack.empty()) {
+        // std::cout << "NO EMPTY" << std::endl;
+        auto& vsdf     = volume_stack.back();
+        auto  distance = sample_transmittance(
+            vsdf.density, intersection.distance, rand1f(rng), rand1f(rng));
+        energy *= eval_transmittance(vsdf.density, distance) /
+                  sample_transmittance_pdf(
+                      vsdf.density, distance, intersection.distance);
+        in_volume = distance < intersection.distance;
+      }
+      if (!in_volume) {
         auto& instance = scene.instances[intersection.instance];
         auto  element  = intersection.element;
         auto  uv       = intersection.uv;
-        auto  position = eval_position(scene, instance, element, uv);
-        auto  normal   = eval_shading_normal(
-            scene, instance, element, uv, outgoing);
-        auto material = eval_material(scene, instance, element, uv);
-        auto incoming = sample_refractive(material.color, material.ior,
-            material.roughness, normal, outgoing, rand1f(rng), rand2f(rng));
-        photon_ray.o  = position;
-        photon_ray.d  = incoming;
-        energy = energy * eval_refractive(material.color, material.ior, normal,
-                              outgoing, incoming);
-        // absorb_color(p, material.color);
+        if (scene.materials[intersection_material].type ==
+            scene_material_type::refractive) {
+          is_caustic_particle = true;
+          // calcular siguiente rayo y esas cosas
+          outgoing = -photon_ray.d;
 
-      } else {
-        if (is_caustic_particle) {
-          // std::cout << "GUARDADO" << std::endl;
-          auto& instance         = scene.instances[intersection.instance];
-          auto  element          = intersection.element;
-          auto  uv               = intersection.uv;
-          auto  position         = eval_position(scene, instance, element, uv);
-          std::vector<float> pos = std::vector<float>();
-          pos.push_back(position.x);
-          pos.push_back(position.y);
-          pos.push_back(position.z);
-          p.flux      = energy;
-          p.position  = position;
-          p.direction = photon_ray.d;
-          m_caustics_map->store(pos, p);
+          auto position = eval_position(scene, instance, element, uv);
+          normal = eval_shading_normal(scene, instance, element, uv, outgoing);
+          auto material = eval_material(scene, instance, element, uv);
+          incoming      = sample_refractive(material.color, material.ior,
+              material.roughness, normal, outgoing, rand1f(rng), rand2f(rng));
+          photon_ray.o  = position;
+          photon_ray.d  = incoming;
+          energy        = energy * eval_refractive(material.color, material.ior,
+                                normal, outgoing, incoming);
+          // absorb_color(p, material.color);
+
+        } else {
+          if (is_caustic_particle) {
+            // std::cout << "GUARDADO" << std::endl;
+            auto& instance = scene.instances[intersection.instance];
+            auto  element  = intersection.element;
+            auto  uv       = intersection.uv;
+            auto  position = eval_position(scene, instance, element, uv);
+            std::vector<float> pos = std::vector<float>();
+            pos.push_back(position.x);
+            pos.push_back(position.y);
+            pos.push_back(position.z);
+            p.flux      = energy;
+            p.position  = position;
+            p.direction = photon_ray.d;
+            m_caustics_map->store(pos, p);
+          }
+          is_caustic_particle = false;
+          end                 = true;
+          break;
         }
-        is_caustic_particle = false;
-        end                 = true;
-        break;
+        // update volume stack
+        if (is_volumetric(scene, instance) &&
+            dot(normal, outgoing) * dot(normal, incoming) < 0) {
+          if (volume_stack.empty()) {
+            auto material = eval_material(scene, instance, element, uv);
+            volume_stack.push_back(material);
+          } else {
+            volume_stack.pop_back();
+          }
+        }
+      } else {
+        // prepare shading point
+        auto  outgoing = -photon_ray.d;
+        auto  position = photon_ray.o + photon_ray.d * intersection.distance;
+        auto& vsdf     = volume_stack.back();
+
+        // next direction
+        auto incoming = zero3f;
+
+        incoming = sample_scattering(vsdf, outgoing, rand1f(rng), rand2f(rng));
+
+        energy *= eval_scattering(vsdf, outgoing, incoming) /
+                  sample_scattering_pdf(vsdf, outgoing, incoming);
+
+        // setup next iteration
       }
+      auto  element  = intersection.element;
+      auto  uv       = intersection.uv;
+      auto& instance = scene.instances[intersection.instance];
     }
   }
   return true;

@@ -50,7 +50,7 @@
   },
   "environments": {
     "sky": {
-      "emission": [0.5, 0.5, 0.5],
+      "emission": [0.1, 0.1, 0.1],
       "emission_tex": "sky"
     }
   },
@@ -60,26 +60,25 @@
       "material": "floor"
     },
     "largearealight1": {
-      "shape": "sphere_little",
-      "frame": [1, 0, 0, 0, 0, 1, 0, -1, 0, -0, 0.25, 0],
+      "shape": "arealight_very_small",
+      "frame": [1, 0, 0, 0, 0, 1, 0, -1, 0, -0, 1.25, 0],
 
       "material": "largearealight1"
     },
     "refractive": {
-      "shape": "pelota_curva",
-      "frame": [1, 0, 0, 0, 0, 1, 0, -1, 0, 0.0, 0.3, 0],
+      "shape": "glass_deformed",
+      "frame": [1, 0, 0, 0, 0, 1, 0, 1, 0, 0.0, 0.8, 0],
       "material": "sphere-refractive"
     }
   },
   "materials": {
     "floor": {
       "type": "matte",
-      "color": [0.7, 0.7, 0.7],
-      "color_tex": "floor"
+      "color": [0.2, 0.2, 0.2]
     },
     "largearealight1": {
       "type": "matte",
-      "emission": [10, 10, 10]
+      "emission": [30, 30, 30]
     },
     "largearealight2": {
       "type": "matte",
@@ -87,7 +86,8 @@
     },
     "sphere-refractive": {
       "type": "refractive",
-      "color": [0.2, 0.2, 1],
+      "color": [0.5, 1, 0.5],
+
       "roughness": 0
     },
     "sphere-refractive2": {

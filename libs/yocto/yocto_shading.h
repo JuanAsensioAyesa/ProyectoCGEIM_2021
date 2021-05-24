@@ -915,6 +915,7 @@ inline float sample_refractive_pdf(const vec3f& color, float ior,
 }
 
 // Evaluate a delta refraction BRDF lobe.
+
 inline vec3f eval_refractive(const vec3f& color, float ior, const vec3f& normal,
     const vec3f& outgoing, const vec3f& incoming) {
   if (abs(ior - 1) < 1e-3)
