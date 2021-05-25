@@ -9,11 +9,11 @@ if __name__ == "__main__":
         command = "./bin/yscene render"
         out_file = "imagen_"+str(i)
         photons = str(lista[i])
-        samples = str(32)
+        samples = str(1)
 
         scene = "iluminacion_vertical"
         seed = random.randrange(1000000)
-        command = command + " --sampler path --photon_mapping --samples "+samples
+        command = command + " --sampler path  --samples "+samples
         command = command + " --seed "+str(seed)
         command = command + " --output ./imagenes/"+out_file+'.png'
         command = command + " ./tests/"+scene+"/"+scene+".json"
@@ -22,20 +22,21 @@ if __name__ == "__main__":
     
 
     # Access all PNG files in directory
-    allfiles=os.listdir(os.getcwd())
-    imlist=[filename for filename in allfiles if  filename[-4:] in [".png",".PNG"]]
+    allfiles=os.listdir("./imagenes")
+    imlist=["./imagenes/"+filename for filename in allfiles if  filename[-4:] in [".png",".PNG"]]
 
     # Assuming all images are the same size, get dimensions of first image
     w,h=Image.open(imlist[0]).size
     N=len(imlist)
 
     # Create a numpy array of floats to store the average (assume RGB images)
-    imarr_shape=numpy.array(Image.open(imlist[1]),dtype=numpy.float).shape
+    imarr_shape=numpy.array(Image.open(imlist[0]),dtype=numpy.float).shape
     arr=numpy.zeros(imarr_shape,numpy.float)
 
     # Build up average pixel intensities, casting each image as an array of floats
     for im in imlist:
         imarr=numpy.array(Image.open(im),dtype=numpy.float)
+        print(arr.shape,"Imarr ",imarr.shape)
         arr=arr+imarr/N
 
     # Round values in array and cast as 8-bit integer
