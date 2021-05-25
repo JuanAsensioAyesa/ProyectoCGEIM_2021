@@ -1,6 +1,6 @@
 import os
 import numpy
-
+import random
 import PIL
 from PIL import Image
 if __name__ == "__main__":
@@ -12,8 +12,9 @@ if __name__ == "__main__":
         samples = str(32)
 
         scene = "iluminacion_vertical"
-
+        seed = random.randrange(1000000)
         command = command + " --sampler path --photon_mapping --samples "+samples
+        command = command + " --seed "+str(seed)
         command = command + " --output ./imagenes/"+out_file+'.png'
         command = command + " ./tests/"+scene+"/"+scene+".json"
         #print(command)
@@ -29,7 +30,7 @@ if __name__ == "__main__":
     N=len(imlist)
 
     # Create a numpy array of floats to store the average (assume RGB images)
-    imarr_shape=numpy.array(Image.open(imlist[0]),dtype=numpy.float).shape
+    imarr_shape=numpy.array(Image.open(imlist[1]),dtype=numpy.float).shape
     arr=numpy.zeros(imarr_shape,numpy.float)
 
     # Build up average pixel intensities, casting each image as an array of floats
