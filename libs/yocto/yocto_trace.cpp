@@ -427,33 +427,6 @@ static trace_result trace_path(const scene_model& scene, const bvh_scene& bvh,
       // accumulate emission
       radiance += weight * eval_emission(material, normal, outgoing);
 
-      // Prueba causticas
-      if (params.photon_mapping && bounce == 0) {
-        std::vector<float> p = std::vector<float>();
-        p.push_back(position.x);
-        p.push_back(position.y);
-        p.push_back(position.z);
-        std::vector<const KDTree<Photon, 3>::Node*> nodes_g;
-
-        // std::cout << "hola" << std::endl;
-        int   m_nb_photons = 200;
-        float max_distance = 0;
-
-        m_caustics_map.find(p, m_nb_photons, nodes_g, max_distance);
-
-        // std::cout << position.x << " " << position.y << " " << position.z
-        //           << std::endl;
-        // int photons = nodes_g.size();
-        // std::cout << m_caustics_map.size() << std::endl;
-        // std::cout << m_caustics_map.size() << std::endl;
-        int   total      = m_caustics_map.size();
-        vec3f total_flux = vec3f{0.0, 0.0, 0.0};
-        for (auto node : nodes_g) {
-          auto photon = node->data();
-          total_flux  = total_flux + photon.flux;  //* photon.color;
-        }
-        radiance += total_flux / (3.1415 * max_distance * max_distance);
-      }
       // next direction
       auto incoming = zero3f;
       if (!is_delta(material)) {
@@ -474,7 +447,34 @@ static trace_result trace_path(const scene_model& scene, const bvh_scene& bvh,
         weight *= eval_delta(material, normal, outgoing, incoming) /
                   sample_delta_pdf(material, normal, outgoing, incoming);
       }
+      // Prueba causticas
+      if (params.photon_mapping && bounce == 0) {
+        std::vector<float> p = std::vector<float>();
+        p.push_back(position.x);
+        p.push_back(position.y);
+        p.push_back(position.z);
+        std::vector<const KDTree<Photon, 3>::Node*> nodes_g;
 
+        // std::cout << "hola" << std::endl;
+        int   m_nb_photons = params.photon_neighbours;
+        float max_distance = 0;
+
+        m_caustics_map.find(p, m_nb_photons, nodes_g, max_distance);
+
+        // std::cout << position.x << " " << position.y << " " << position.z
+        //           << std::endl;
+        // int photons = nodes_g.size();
+        // std::cout << m_caustics_map.size() << std::endl;
+        // std::cout << m_caustics_map.size() << std::endl;
+        int   total      = m_caustics_map.size();
+        vec3f total_flux = vec3f{0.0, 0.0, 0.0};
+        for (auto node : nodes_g) {
+          auto photon = node->data();
+          total_flux  = total_flux + photon.flux;  //* photon.color;
+        }
+        total_flux *= weight;
+        radiance += total_flux / (3.1415 * max_distance * max_distance);
+      }
       // update volume stack
       if (is_volumetric(scene, instance) &&
           dot(normal, outgoing) * dot(normal, incoming) < 0) {
@@ -1218,7 +1218,7 @@ static trace_result trace_photon_map(const scene_model& scene,
   std::vector<const KDTree<Photon, 3>::Node*> nodes_g;
 
   // std::cout << "hola" << std::endl;
-  int   m_nb_photons = 100;
+  int   m_nb_photons = params.photon_neighbours;
   float max_distance = 0;
 
   m_caustics_map.find(p, m_nb_photons, nodes_g, max_distance);
@@ -1234,7 +1234,7 @@ static trace_result trace_photon_map(const scene_model& scene,
     auto photon = node->data();
     total_flux  = total_flux + photon.flux;  //* photon.color;
   }
-  radiance = total_flux / (3.1415 * max_distance * max_distance);
+  weight *= total_flux / (3.1415 * max_distance * max_distance);
   // radiance  = vec3f{normal.x, normal.y, normal.z};
   return {radiance, true, hit_albedo, hit_normal};
 }
@@ -1404,8 +1404,9 @@ color_image trace_image(const scene_model& scene, const trace_params& params) {
 void trace_samples(trace_state& state, const scene_model& scene,
     const bvh_scene& bvh, const trace_lights& lights,
     const trace_params& params) {
+  int rng_i = 0;
   if (state.samples == 0) {
-    auto rng = make_rng(1301081);
+    auto rng = make_rng(params.seed + params.seed_offset);
 
     if (params.photon_mapping ||
         params.sampler == trace_sampler_type::photon_map) {

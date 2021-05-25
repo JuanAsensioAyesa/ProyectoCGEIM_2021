@@ -95,25 +95,27 @@ const auto trace_default_seed = 961748941ull;
 
 // Options for trace functions
 struct trace_params {
-  int                   camera         = 0;
-  int                   resolution     = 1280;
-  trace_sampler_type    sampler        = trace_sampler_type::path;
-  trace_falsecolor_type falsecolor     = trace_falsecolor_type::color;
-  int                   samples        = 512;
-  int                   bounces        = 8;
-  float                 clamp          = 10;
-  bool                  nocaustics     = false;
-  bool                  envhidden      = false;
-  bool                  tentfilter     = false;
-  uint64_t              seed           = trace_default_seed;
-  bool                  embreebvh      = false;
-  bool                  highqualitybvh = false;
-  bool                  noparallel     = false;
-  int                   pratio         = 8;
-  float                 exposure       = 0;
-  bool                  filmic         = false;
-  bool                  denoise        = false;
-  bool                  photon_mapping = false;
+  int                   camera            = 0;
+  int                   resolution        = 1280;
+  trace_sampler_type    sampler           = trace_sampler_type::path;
+  trace_falsecolor_type falsecolor        = trace_falsecolor_type::color;
+  int                   samples           = 512;
+  int                   bounces           = 8;
+  float                 clamp             = 10;
+  bool                  nocaustics        = false;
+  bool                  envhidden         = false;
+  bool                  tentfilter        = false;
+  uint64_t              seed              = trace_default_seed;
+  bool                  embreebvh         = false;
+  bool                  highqualitybvh    = false;
+  bool                  noparallel        = false;
+  int                   pratio            = 8;
+  float                 exposure          = 0;
+  bool                  filmic            = false;
+  bool                  denoise           = false;
+  bool                  photon_mapping    = false;
+  int                   photon_neighbours = 100;
+  int                   seed_offset       = 0;
 };
 
 inline const auto trace_sampler_names = std::vector<std::string>{
