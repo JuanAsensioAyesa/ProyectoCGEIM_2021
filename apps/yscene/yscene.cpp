@@ -177,7 +177,7 @@ void add_command(cli_command& cli, const string& name, render_params& params,
   add_option(
       cmd, "photon_mapping", params.photon_mapping, "Enable photon mapping.");
   add_option(cmd, "photon_neighbours", params.photon_neighbours,
-      "Number of photon neighbours to search.", {50, 1000});
+      "Number of photon neighbours to search.", {10, 1000});
   add_option(cmd, "seed", params.seed_offset, "seed.");
 }
 
