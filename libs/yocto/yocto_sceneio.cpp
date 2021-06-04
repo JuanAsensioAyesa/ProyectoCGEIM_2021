@@ -35,6 +35,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <unordered_map>
@@ -138,6 +139,7 @@ vector<string> list_directory(const string& filename) {
 
 // Create a directory and all missing parent directories if needed
 bool make_directory(const string& dirname, string& error) {
+  std::cout << "DIR " << dirname << std::endl;
   if (path_exists(dirname)) return true;
   try {
     create_directories(make_path(dirname));

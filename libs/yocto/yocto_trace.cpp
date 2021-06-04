@@ -1234,7 +1234,7 @@ static trace_result trace_photon_map(const scene_model& scene,
     auto photon = node->data();
     total_flux  = total_flux + photon.flux;  //* photon.color;
   }
-  weight *= total_flux / (3.1415 * max_distance * max_distance);
+  radiance += total_flux / (3.1415 * max_distance * max_distance);
   // radiance  = vec3f{normal.x, normal.y, normal.z};
   return {radiance, true, hit_albedo, hit_normal};
 }

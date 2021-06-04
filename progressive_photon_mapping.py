@@ -4,21 +4,24 @@ import random
 import PIL
 from PIL import Image
 if __name__ == "__main__":
-    lista = [10,50,100,200]
+    lista = [10,15,20,25,30,35,40,50,100,200]
+    lista = numpy.arange(100)
     for i in numpy.arange(len(lista)):
         command = "./bin/yscene render"
-        out_file = "imagen_"+str(i)
+        out_file = "imagen_"+str(lista[i])
         photons = str(lista[i])
         samples = str(1)
 
         scene = "iluminacion_vertical"
         seed = random.randrange(1000000)
-        command = command + " --sampler path  --samples "+samples
+        command = command + " --sampler photon_map --photon_mapping --samples "+samples
         command = command + " --seed "+str(seed)
+        command = command + " --photon_neighbours "+str(lista[i] + 1)
         command = command + " --output ./imagenes/"+out_file+'.png'
         command = command + " ./tests/"+scene+"/"+scene+".json"
         #print(command)
-        os.system(command)
+        os.system(command + " > /dev/null")
+        print(i)
     
 
     # Access all PNG files in directory
