@@ -1320,9 +1320,9 @@ trace_state make_state(const scene_model& scene, const trace_params& params) {
   state.normal.assign(state.width * state.height, {0, 0, 0});
   state.hits.assign(state.width * state.height, 0);
   state.rngs.assign(state.width * state.height, {});
-  auto rng_ = make_rng(1301081);
+  auto rng_ = make_rng(params.seed + params.seed_offset);
   for (auto& rng : state.rngs) {
-    rng = make_rng(params.seed, rand1i(rng_, 1 << 31) / 2 + 1);
+    rng = make_rng(1301081, rand1i(rng_, 1 << 31) / 2 + 1);
   }
   return state;
 }
